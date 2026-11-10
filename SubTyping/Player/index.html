@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>SubTyping YouTube Player</title>
+  <style>html,body,#player{width:100%;height:100%;margin:0;background:#000;overflow:hidden}</style>
+</head>
+<body>
+  <div id="player"></div>
+  <script>
+    let player;
+    let pendingVideoId = null;
+    function onYouTubeIframeAPIReady() {
+      if (pendingVideoId) loadVideo(pendingVideoId);
+    }
+    function loadVideo(videoId) {
+      pendingVideoId = videoId;
+      if (!window.YT || !YT.Player) return;
+      if (player) player.loadVideoById(videoId);
+      else player = new YT.Player('player', {
+        videoId,
+        playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+        events: { onReady: () => notify('ready') }
+      });
+    }
+    function notify(type, value) {
+      window.chrome.webview.postMessage({ type, value: value ?? null });
+    }
+    setInterval(() => {
+      if (player) notify('time', player.getCurrentTime());
+    }, 100);
+    function handleMessage(event) {
+      const message = event.data || {};
+      if (message.command === 'load') loadVideo(message.videoId);
+      if (message.command === 'play') player?.playVideo();
+      if (message.command === 'pause') player?.pauseVideo();
+      if (message.command === 'seek') player?.seekTo(Number(message.seconds), true);
+      if (message.command === 'time') notify('time', player?.getCurrentTime() ?? 0);
+    }
+    window.addEventListener('message', handleMessage);
+  </script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>

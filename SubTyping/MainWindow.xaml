@@ -1,0 +1,215 @@
+﻿<Window x:Class="SubTyping.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:media="clr-namespace:SubTyping"
+        mc:Ignorable="d"
+        Title="SubTyping"
+        Height="720"
+        Width="1120"
+        MinHeight="600"
+        MinWidth="900"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Margin="0,0,0,26">
+            <StackPanel>
+                <TextBlock Text="SubTyping" FontSize="30" FontWeight="SemiBold" />
+                <TextBlock Text="Practice by typing along with YouTube captions"
+                           Margin="0,5,0,0"
+                           Foreground="{DynamicResource SecondaryTextBrush}" />
+            </StackPanel>
+            <ToggleButton DockPanel.Dock="Right"
+                          Width="92"
+                          Height="40"
+                          Content="Dark"
+                          Style="{StaticResource NeoToggleButtonStyle}"
+                          IsChecked="{Binding IsDarkTheme}" />
+        </DockPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.1*" />
+                <ColumnDefinition Width="28" />
+                <ColumnDefinition Width="1.6*" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Padding="28" Style="{StaticResource NeoCardStyle}"
+                    Visibility="{Binding IsPracticing, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="YouTube source" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock Text="Paste a YouTube link. Available caption tracks will be fetched automatically."
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,22"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <TextBlock Text="Video URL" Style="{StaticResource FieldLabelStyle}" />
+                    <TextBox Text="{Binding YouTubeUrl, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource NeoTextBoxStyle}"
+                             ToolTip="https://www.youtube.com/watch?v=..." />
+                    <TextBlock Text="Caption language"
+                               Style="{StaticResource FieldLabelStyle}"
+                               Margin="0,22,0,8" />
+                    <ComboBox ItemsSource="{Binding CaptionTracks}"
+                              SelectedItem="{Binding SelectedCaptionTrack}"
+                              DisplayMemberPath="DisplayName"
+                              Style="{StaticResource NeoComboBoxStyle}" />
+                    <Button Content="Fetch captions"
+                            Command="{Binding FetchCaptionsCommand}"
+                            Style="{StaticResource NeoButtonStyle}"
+                            Margin="0,24,0,0" />
+                    <Separator Margin="0,24,0,18" />
+                    <TextBlock Text="Local MP3 song" FontSize="18" FontWeight="SemiBold" />
+                    <Button Content="Choose MP3"
+                            Click="ChooseMp3_Click"
+                            Style="{StaticResource NeoButtonStyle}"
+                            Margin="0,12,0,0" />
+                    <TextBlock Text="{Binding LocalTrackText}"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,0"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <StackPanel Visibility="{Binding IsTapAlongMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                Margin="0,16,0,0">
+                        <TextBlock Text="Tap-along sync"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="Play the song and record each lyric line at its start."
+                                   TextWrapping="Wrap"
+                                   Margin="0,5,0,8"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" />
+                        <TextBox Text="{Binding TapLineText, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource NeoTextBoxStyle}"
+                                 ToolTip="Type the lyric line currently playing" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <Button Content="Record line"
+                                    Command="{Binding RecordTapLineCommand}"
+                                    Style="{StaticResource NeoButtonStyle}"
+                                    Padding="12,8" />
+                            <Button Content="Finish sync"
+                                    Command="{Binding FinishTapAlongCommand}"
+                                    Style="{StaticResource NeoButtonStyle}"
+                                    Padding="12,8"
+                                    Margin="8,0,0,0" />
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding TapAlongLines}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <TextBlock Text="{Binding StatusMessage}"
+                               TextWrapping="Wrap"
+                               Margin="0,18,0,0"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="0" Grid.ColumnSpan="3" Padding="28" Style="{StaticResource NeoCardStyle}"
+                    Visibility="{Binding IsPracticing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="3*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="♫" FontSize="30" Foreground="{DynamicResource AccentBrush}" />
+                            <StackPanel Margin="10,0,0,0">
+                                <TextBlock Text="Practice" FontSize="26" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding LocalTrackText}"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="Full screen"
+                                    Click="ToggleFullScreen_Click"
+                                    Style="{StaticResource NeoButtonStyle}"
+                                    Padding="14,8"
+                                    Margin="0,0,10,0" />
+                            <Button Content="Stop"
+                                    Command="{Binding StopPracticeCommand}"
+                                    Style="{StaticResource NeoButtonStyle}"
+                                    Padding="14,8" />
+                        </StackPanel>
+                    </DockPanel>
+                    <media:YouTubePlayerHost x:Name="YouTubePlayer"
+                                             Grid.Row="1"
+                                             Margin="0,18,0,12" />
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,12,0,18">
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding Practice.Characters}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel HorizontalAlignment="Center" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Character}"
+                                                   FontSize="30"
+                                                   FontWeight="SemiBold"
+                                                   Margin="1"
+                                                   Foreground="{Binding Status, Converter={StaticResource CharacterStatusBrushConverter}}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <ItemsControl ItemsSource="{Binding Practice.NextLines}" Margin="0,28,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="16"
+                                                   Margin="0,3"
+                                                   Foreground="{DynamicResource SecondaryTextBrush}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <TextBox Grid.Row="3"
+                             Text="{Binding Practice.InputText, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource NeoTextBoxStyle}"
+                             FontSize="20"
+                             PreviewKeyDown="PracticeInput_PreviewKeyDown"
+                             IsEnabled="{Binding Practice.IsComplete, Converter={StaticResource InverseBooleanConverter}}" />
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                        <TextBlock Text="Line " Foreground="{DynamicResource SecondaryTextBrush}" />
+                        <TextBlock Text="{Binding Practice.ProgressText}" Margin="3,0,18,0" />
+                        <TextBlock Text="WPM " Foreground="{DynamicResource SecondaryTextBrush}" />
+                        <TextBlock Text="{Binding Practice.WpmText}" Margin="3,0,18,0" />
+                        <TextBlock Text="Accuracy " Foreground="{DynamicResource SecondaryTextBrush}" />
+                        <TextBlock Text="{Binding Practice.AccuracyText}" Margin="3,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Column="2" Padding="28" Style="{StaticResource NeoCardStyle}"
+                    Visibility="{Binding IsPracticing, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Ready to practice"
+                               FontSize="26"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Your current caption line and typing feedback will appear here."
+                               TextWrapping="Wrap"
+                               TextAlignment="Center"
+                               Margin="0,14,0,28"
+                               Foreground="{DynamicResource SecondaryTextBrush}" />
+                    <Button Content="Start practice"
+                            Command="{Binding StartPracticeCommand}"
+                            Style="{StaticResource NeoButtonStyle}"
+                            HorizontalAlignment="Center"
+                            Width="180" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
